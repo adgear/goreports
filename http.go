@@ -30,7 +30,7 @@ func RequestHTTP(r *http.Request, body []byte) (data Data) {
 	}
 
 	data.Name = "request"
-	data.Bytes = buffer.Bytes()
+	data.Blob = buffer.Bytes()
 	return
 }
 
@@ -56,6 +56,6 @@ func ResponseHTTP(r *http.Response, body []byte) (data Data) {
 	}
 
 	data.Name = "response"
-	data.Bytes = buffer.Bytes()
+	data.Blob = buffer.Bytes()
 	return
 }

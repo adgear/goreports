@@ -12,7 +12,7 @@ import (
 // Report defines basic informations that are required for reports.
 type Report struct {
 	// Reporter contains the name of the reporter producing the report.
-	Reporter string
+	Reporter string `json:"reporter"`
 	// Time contains the time the report was created.
 	Time time.Time `json:"time"`
 	// Component contains the name of the component producing the report.
@@ -28,26 +28,26 @@ type Data struct {
 	// ID contains an identifier for this entry.
 	Name string
 	// Bytes contains the binary data associated with the report.
-	Bytes []byte
+	Blob []byte
 }
 
 // Write outputs the report as text followed by the associated binary data separated by new lines.
 func (report *Report) Write(w io.Writer) {
-	text := fmt.Sprintf("time: %s\ncomponent: %s\nstatus: %s\n", report.Time, report.Component, report.Status)
+	text := fmt.Sprintf("reports: %s\ntime: %s\ncomponent: %s\nstatus: %s\n", report.Reporter, report.Time, report.Component, report.Status)
 	io.WriteString(w, text)
 
 	if len(report.Content) != 0 {
 		io.WriteString(w, "content:")
 
 		for i, item := range report.Content {
-			text := fmt.Sprintf("\n %d. '%s' has %d bytes", i, item.Name, len(item.Bytes))
+			text := fmt.Sprintf("\n %d. '%s' has %d bytes", i, item.Name, len(item.Blob))
 			io.WriteString(w, text)
 		}
 
 		io.WriteString(w, "\n")
 
 		for _, item := range report.Content {
-			w.Write(item.Bytes)
+			w.Write(item.Blob)
 			io.WriteString(w, "\n")
 		}
 	}
@@ -60,7 +60,7 @@ func (data *Data) MarshalJSON() ([]byte, error) {
 		Length int    `json:"len"`
 	}{
 		ID:     data.Name,
-		Length: len(data.Bytes),
+		Length: len(data.Blob),
 	}
 
 	return json.Marshal(s)
@@ -78,7 +78,7 @@ func (data *Data) UnmarshalJSON(bytes []byte) (err error) {
 	}
 
 	data.Name = s.ID
-	data.Bytes = make([]byte, s.Length)
+	data.Blob = make([]byte, s.Length)
 	return
 }
 
@@ -91,7 +91,7 @@ func (report *Report) WriteJSON(w io.Writer) {
 	}
 
 	for _, item := range report.Content {
-		w.Write(item.Bytes)
+		w.Write(item.Blob)
 
 		// separate binary data with a new line
 		io.WriteString(w, "\n")
@@ -116,7 +116,7 @@ func ReadJSON(r io.Reader) (report *Report, err error) {
 	}
 
 	for _, item := range data.Content {
-		if _, err = binary.Read(item.Bytes); err != nil {
+		if _, err = binary.Read(item.Blob); err != nil {
 			return
 		}
 

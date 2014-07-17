@@ -4,6 +4,7 @@ package report
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -22,6 +23,32 @@ type Reporter struct {
 	Name string
 	// Publisher represents the handler that will publish reports.
 	Publisher Publisher
+
+	reports chan *Report
+}
+
+// Start creates the background service that publish reports.
+func (reporter *Reporter) Start() (err error) {
+	if reporter.Name == "" {
+		err = fmt.Errorf("missing reporter name")
+		return
+	}
+
+	if reporter.Publisher == nil {
+		reporter.PublishFunc(func(r *Report) {
+			r.Write(os.Stdout)
+		})
+	}
+
+	reporter.reports = make(chan *Report)
+
+	go func() {
+		for item := range reporter.reports {
+			reporter.Publisher.Send(item)
+		}
+	}()
+
+	return
 }
 
 // Log creates a report based on the supplied text along with some associated binary data.
@@ -43,12 +70,7 @@ func (reporter *Reporter) write(name, s string, data []Data) {
 		Content:   data,
 	}
 
-	if reporter.Publisher == nil {
-		r.Write(os.Stdout)
-		return
-	}
-
-	reporter.Publisher.Send(&r)
+	reporter.reports <- &r
 }
 
 // Publish sets the publish handler.
@@ -69,9 +91,9 @@ func (reporter *Reporter) PublishFunc(handler func(r *Report)) {
 	reporter.Publish(PublishFunc(handler))
 }
 
-// NewJSONReporter creates a publisher that POST the report as a JSON object to the specified URL followed by the associated binary data.
-func NewJSONReporter(name string, url string) *Reporter {
-	reporter := &Reporter{
+// NewJSONReporter creates and starts a publisher that POST the report as a JSON object to the specified URL followed by the associated binary data.
+func NewJSONReporter(name string, url string) (reporter *Reporter) {
+	reporter = &Reporter{
 		Name: name,
 	}
 
@@ -89,5 +111,6 @@ func NewJSONReporter(name string, url string) *Reporter {
 		rep.Body.Close()
 	})
 
-	return reporter
+	reporter.Start()
+	return
 }
