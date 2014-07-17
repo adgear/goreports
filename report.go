@@ -11,9 +11,11 @@ import (
 
 // Report defines basic informations that are required for reports.
 type Report struct {
+	// Reporter contains the name of the reporter producing the report.
+	Reporter string
 	// Time contains the time the report was created.
 	Time time.Time `json:"time"`
-	// Component contains the name of the reporter producing the report.
+	// Component contains the name of the component producing the report.
 	Component string `json:"component"`
 	// Status contains the text of the report.
 	Status string `json:"status"`

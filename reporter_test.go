@@ -32,10 +32,10 @@ func TestReporter(t *testing.T) {
 	}
 
 	h := httptest.NewServer(http.HandlerFunc(endpoint))
-	r := NewJSONReporter("report-test", h.URL)
+	r := NewJSONReporter("test", h.URL)
 
 	go func() {
-		r.String("hello")
+		r.Log("test", "hello")
 
 		i := struct {
 			ID   int
@@ -58,8 +58,8 @@ func TestReporter(t *testing.T) {
 			t.Fatal(err.Error())
 		}
 
-		r.StringWithData("brave", Data{"some", some})
-		r.StringWithData("world", Data{"some", some}, Data{"some more", more})
+		r.Log("test", "brave", Data{"some", some})
+		r.Log("test", "world", Data{"some", some}, Data{"some more", more})
 	}()
 
 	if s := <-result; s != "hello" {

@@ -24,30 +24,21 @@ type Reporter struct {
 	Publisher Publisher
 }
 
-// String creates a report based on the supplied text.
-func (reporter *Reporter) String(s string) {
-	reporter.write(s, nil)
+// Log creates a report based on the supplied text along with some associated binary data.
+func (reporter *Reporter) Log(name, s string, data ...Data) {
+	reporter.write(name, s, data)
 }
 
-// StringWithData creates a report based on the supplied text along with some associated binary data.
-func (reporter *Reporter) StringWithData(s string, data ...Data) {
-	reporter.write(s, data)
+// Error creates a report based on the supplied error along with some associated binary data.
+func (reporter *Reporter) Error(name string, e error, data ...Data) {
+	reporter.write(name, e.Error(), data)
 }
 
-// Error creates a report based on the supplied error.
-func (reporter *Reporter) Error(e error) {
-	reporter.String(e.Error())
-}
-
-// ErrorWithData creates a report based on the supplied error along with some associated binary data.
-func (reporter *Reporter) ErrorWithData(e error, data ...Data) {
-	reporter.StringWithData(e.Error(), data...)
-}
-
-func (reporter *Reporter) write(s string, data []Data) {
+func (reporter *Reporter) write(name, s string, data []Data) {
 	r := Report{
+		Reporter:  reporter.Name,
 		Time:      time.Now(),
-		Component: reporter.Name,
+		Component: name,
 		Status:    s,
 		Content:   data,
 	}
