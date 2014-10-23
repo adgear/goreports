@@ -5,6 +5,7 @@ package report
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -14,19 +15,19 @@ func RequestHTTP(r *http.Request, body []byte) (data Data) {
 
 	s := fmt.Sprintf("%s %s %s\r\n", r.Method, r.RequestURI, r.Proto)
 	if _, err := buffer.WriteString(s); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if err := r.Header.Write(buffer); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if _, err := buffer.WriteString("\r\n"); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if _, err := buffer.Write(body); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	data.Name = "request"
@@ -40,19 +41,19 @@ func ResponseHTTP(r *http.Response, body []byte) (data Data) {
 
 	s := fmt.Sprintf("%s %s\r\n", r.Status, r.Proto)
 	if _, err := buffer.WriteString(s); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if err := r.Header.Write(buffer); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if _, err := buffer.WriteString("\r\n"); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	if _, err := buffer.Write(body); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	data.Name = "response"

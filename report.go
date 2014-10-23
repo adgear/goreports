@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"time"
 )
 
@@ -87,7 +88,7 @@ func (report *Report) WriteJSON(w io.Writer) {
 	encoder := json.NewEncoder(w)
 
 	if err := encoder.Encode(report); err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	}
 
 	for _, item := range report.Content {
